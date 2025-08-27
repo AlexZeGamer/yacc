@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yacc"
+version = "0.1.0"
+description = "Yet Another C Compiler"
+authors = [{name = "Alexandre MALFREYT", email = "alexandre@malfre.yt"}]
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.urls]
+Homepage = "https://github.com/AlexZeGamer/yacc"
+Repository = "https://github.com/AlexZeGamer/yacc"
+Issues = "https://github.com/AlexZeGamer/yacc/issues"
+
+[project.scripts]
+yacc = "yacc.__main__:main"
