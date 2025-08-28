@@ -1,6 +1,9 @@
 from enum import Enum, auto
+import re
 
 class TokenType(Enum):
+    TOK_UNKNOWN = auto()  # token inconnu
+
     TOK_EOF = auto()  # end of file
     TOK_CONST = (
         auto()
@@ -44,7 +47,6 @@ class TokenType(Enum):
 
     # Adresse et valeur
     TOK_ADDRESS = auto()  # &
-    TOK_DEREF = auto()  # *
 
     # Mots-clés
     TOK_INT = auto()  # int
@@ -64,8 +66,64 @@ class TokenType(Enum):
     TOK_RECV = auto()  # recv
 
 
-class Token:     
+class Token:
+    keywords = {
+        "int": TokenType.TOK_INT,
+        "void": TokenType.TOK_VOID,
+        "return": TokenType.TOK_RETURN,
+        "if": TokenType.TOK_IF,
+        "else": TokenType.TOK_ELSE,
+        "for": TokenType.TOK_FOR,
+        "do": TokenType.TOK_DO,
+        "while": TokenType.TOK_WHILE,
+        "break": TokenType.TOK_BREAK,
+        "continue": TokenType.TOK_CONTINUE,
+        "debug": TokenType.TOK_DEBUG,
+        "send": TokenType.TOK_SEND,
+        "recv": TokenType.TOK_RECV,
+    }
+
+    operators = {
+        "+": TokenType.TOK_ADD,
+        "-": TokenType.TOK_SUB,
+        "*": TokenType.TOK_MUL,
+        "/": TokenType.TOK_DIV,
+        "%": TokenType.TOK_MOD,
+        "&&": TokenType.TOK_AND,
+        "||": TokenType.TOK_OR,
+        "!": TokenType.TOK_NOT,
+        "==": TokenType.TOK_EQ,
+        "!=": TokenType.TOK_NOT_EQ,
+        "<": TokenType.TOK_LOWER,
+        "<=": TokenType.TOK_LOWER_EQ,
+        ">": TokenType.TOK_GREATER,
+        ">=": TokenType.TOK_GREATER_EQ,
+        "(": TokenType.TOK_LPARENTHESIS,
+        ")": TokenType.TOK_RPARENTHESIS,
+        "[": TokenType.TOK_LBRACKET,
+        "]": TokenType.TOK_RBRACKET,
+        "{": TokenType.TOK_LBRACE,
+        "}": TokenType.TOK_RBRACE,
+        "=": TokenType.TOK_AFFECT,
+        ";": TokenType.TOK_SEMICOLON,
+        ",": TokenType.TOK_COMMA,
+        "&": TokenType.TOK_ADDRESS,
+    }
+
     def __init__(self, tok_type: TokenType, value: int = None, repr: str = None):
         self.type: TokenType = tok_type
         self.value: int = value
         self.repr: str = repr
+
+    def __str__(self):
+        return (
+            f"Token: "
+            f"type = {self.type.name:<18} "
+            f"value = {self.value!s:<10} "
+            f"repr = {self.repr.replace('\n', '\\n')}"
+        )
+    
+    def __repr__(self):
+        return (
+            f"Token(type={self.type}, value={self.value}, repr={self.repr.replace('\n', '\\n')})"
+        )
