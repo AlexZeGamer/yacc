@@ -1,7 +1,9 @@
 # TODO
 - [ ] Handle comments in lexer
-- [ ] Implement parser methods
+- [x] Implement parser methods
 - [ ] Add a arg to output the generated assembly to stdout
+- [ ] Add a way to get the input from a string
+- [ ] Add a way to get the input from stdin
 - [ ] Add tests for lexer, parser, optimizer, codegen
 - [x] Add a way to print trees beautifully (for debug)
 - [ ] Improve error handling and reporting

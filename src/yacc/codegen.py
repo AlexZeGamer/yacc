@@ -1,3 +1,5 @@
+from node import Node, NodeType
+
 class CodeGenerator:
     def __init__(self):
         self._lines: list[str] = []
@@ -32,3 +34,23 @@ class CodeGenerator:
     def codegen(self, parser, sema, optimizer) -> None:
         """One code generation step"""
         A = optimizer.optimize(sema.analyze(parser.parse()))
+        if A is not None:
+            self.gennode(A)
+
+    def gennode(self, node) -> None:
+        """Generate code for a single AST node (recursive)"""
+
+        match node.type:
+            case NodeType.NODE_CONST:
+                self.add_line(f"push {node.value}")
+            case NodeType.NODE_NOT:
+                if node.children:
+                    self.gennode(node.children[0])
+                self.add_line("not")
+            case NodeType.NODE_NEG:
+                self.add_line("push 0")
+                if node.children:
+                    self.gennode(node.children[0])
+                self.add_line("sub")
+            case _:
+                pass
