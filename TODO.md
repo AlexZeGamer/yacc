@@ -3,7 +3,7 @@
 - [ ] Implement parser methods
 - [ ] Add a arg to output the generated assembly to stdout
 - [ ] Add tests for lexer, parser, optimizer, codegen
-- [ ] Add a way to print trees beautifully (for debug)
+- [x] Add a way to print trees beautifully (for debug)
 - [ ] Improve error handling and reporting
 - [ ] Write a README.md (project overview, how to run, how to install, how to run tests, what's implemented & what's missing, etc.)
   - [ ] Put a schema of the pipeline (Mermaid schema from Notion) + examples
