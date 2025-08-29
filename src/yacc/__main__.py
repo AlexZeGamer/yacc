@@ -2,6 +2,11 @@ import argparse
 
 from source import Source
 from lexer import Lexer
+from token import TokenType
+from parser import Parser
+from sema import SemanticAnalyzer
+from optimizer import Optimizer
+from codegen import CodeGenerator
 
 def main():
     """Main function to handle argument parsing and file reading."""
@@ -18,19 +23,24 @@ def main():
     if args.output is None:
         args.output = args.input.rsplit('.', 1)[0] + '.out'
 
-    print(f"Compiling {args.input} to {args.output}")
+    # print(f"Compiling {args.input} to {args.output}")
 
     source_code: Source = Source.from_path(args.input)
 
     lexer = Lexer(source_code)
-    with open(args.output, "w") as f:
-        f.write("")  # clear the output file
-    from token import TokenType
-    if lexer.T is not None:
-        while lexer.T.type != TokenType.TOK_EOF:
-            with open(args.output, "a") as f:
-                f.write(f"{lexer.T}\n")
-            lexer.next()
+    if lexer.T is None:
+        print("No tokens found.")
+        return
+
+    parser = Parser(lexer)
+    sema = SemanticAnalyzer()
+    optimizer = Optimizer()
+    codegen = CodeGenerator()
+
+    codegen._start()
+    while lexer.T.type != TokenType.TOK_EOF:
+        codegen.codegen(parser, sema, optimizer)
+    codegen._close(args.output)
 
 if __name__ == "__main__":
     main()
