@@ -1,5 +1,7 @@
 # TODO
-- [ ] Handle comments in lexer
+- [x] Handle comments in lexer
+  - [x] One line comments (//)
+  - [x] Multi-line comments (/* ... */)
 - [x] Implement parser methods
 - [x] Add a arg to output the generated assembly to stdout
 - [x] Add a way to get the input from a string

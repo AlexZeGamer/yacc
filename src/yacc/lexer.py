@@ -3,7 +3,6 @@ from source import Source
 
 class Lexer:
     def __init__(self, source_code: Source | str):
-        print(type(source_code))
         self.source_code: Source = Source.from_path(source_code) if isinstance(source_code, str) else source_code
         self.pos: int = 0
         self.T: Token = None
@@ -14,10 +13,43 @@ class Lexer:
         """Read the next token from the source code and update global T and T_prev."""
         self.T_prev = self.T
         
-        # skip whitespace
-        # TODO: handle comments
-        while self.pos < len(self.source_code) and self.source_code[self.pos].isspace():
-            self.pos += 1
+        # skip whitespace and comments
+        while True:
+            # skip whitespace
+            while self.pos < len(self.source_code) and self.source_code[self.pos].isspace():
+                self.pos += 1
+
+            # handle comments
+            if self.pos + 1 < len(self.source_code) and self.source_code[self.pos] == '/':
+                nxt = self.source_code[self.pos + 1]
+
+                # single-line comment: // ... (until EOL)
+                if nxt == '/':
+                    self.pos += 2
+                    while self.pos < len(self.source_code) and self.source_code[self.pos] != '\n':
+                        self.pos += 1
+                    # loop again to skip following whitespace/comments
+                    continue
+
+                # multi-line comment: /* ... */
+                if nxt == '*':
+                    start_pos = self.pos
+                    self.pos += 2
+                    closed = False
+                    while self.pos + 1 < len(self.source_code):
+                        if self.source_code[self.pos:self.pos + 2] == '*/':
+                            self.pos += 2
+                            closed = True
+                            break
+                        self.pos += 1
+                    if not closed:
+                        line, col = self.source_code.pos_to_line_col(start_pos)
+                        raise SyntaxError(f"Unterminated comment starting at line {line}, column {col}")
+                    
+                    # loop again to skip following whitespace/comments
+                    continue
+
+            break
 
         if self.pos < len(self.source_code):
             current_char = self.source_code[self.pos]
