@@ -1,12 +1,16 @@
 # TODO
 - [ ] Handle comments in lexer
 - [x] Implement parser methods
-- [ ] Add a arg to output the generated assembly to stdout
-- [ ] Add a way to get the input from a string
-- [ ] Add a way to get the input from stdin
+- [x] Add a arg to output the generated assembly to stdout
+- [x] Add a way to get the input from a string
+- [x] Add a way to get the input from stdin
+- [ ] Add verbose/debug modes
+  - [ ] Think about how to handle verbose mode being enabled the the same time as --stdout (print to stderr?)
 - [ ] Add tests for lexer, parser, optimizer, codegen
 - [x] Add a way to print trees beautifully (for debug)
-- [ ] Improve error handling and reporting
+- [ ] Improve error handling and reporting for compilation errors
+  - [ ] Make explicit error classes for different error types (LexerError, ParserError, SemanticError, etc.)
+  - [ ] Add line/column info to all errors (requires adding position tracking in tokens)
 - [ ] Write a README.md (project overview, how to run, how to install, how to run tests, what's implemented & what's missing, etc.)
   - [ ] Put a schema of the pipeline (Mermaid schema from Notion) + examples
   - [ ] Make a README in EN (default) and FR

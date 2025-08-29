@@ -10,6 +10,18 @@ class Source:
         with open(path, "r", encoding="utf-8") as f:
             return cls(f.read(), name=path)
 
+    @classmethod
+    def from_string(cls, text: str, name: str = "<string>") -> Self:
+        """Create a Source from a provided string."""
+        return cls(text, name=name)
+
+    @classmethod
+    def from_stdin(cls) -> Self:
+        """Create a Source by reading all data from standard input."""
+        import sys
+        data = sys.stdin.read()
+        return cls(data, name="<stdin>")
+
     def pos_to_line_col(self, pos: int) -> tuple[int, int]:
         """Convert a position in the source code to (line, col) tuple."""
         line = 1
