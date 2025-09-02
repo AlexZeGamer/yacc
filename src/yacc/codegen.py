@@ -1,4 +1,4 @@
-from node import Node, NodeType
+from .node import Node, NodeType
 
 class CodeGenerator:
     def __init__(self, output_path: str = None, to_stdout: bool = False) -> None:

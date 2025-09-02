@@ -1,6 +1,6 @@
-from token import Token, TokenType
-from node import Node, NodeType
-from lexer import Lexer
+from .token import Token, TokenType
+from .node import Node, NodeType
+from .lexer import Lexer
 
 class Parser:
     def __init__(self, lexer: Lexer = None):

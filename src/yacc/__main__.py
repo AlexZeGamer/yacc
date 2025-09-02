@@ -1,12 +1,12 @@
 import argparse
 
-from source import Source
-from lexer import Lexer
-from token import TokenType
-from parser import Parser
-from sema import SemanticAnalyzer
-from optimizer import Optimizer
-from codegen import CodeGenerator
+from .source import Source
+from .lexer import Lexer
+from .token import TokenType
+from .parser import Parser
+from .sema import SemanticAnalyzer
+from .optimizer import Optimizer
+from .codegen import CodeGenerator
 
 def main():
     """Main function to handle argument parsing and compilation pipeline."""

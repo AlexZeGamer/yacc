@@ -1,5 +1,5 @@
-from token import Token, TokenType
-from source import Source
+from .token import Token, TokenType
+from .source import Source
 
 class Lexer:
     def __init__(self, source_code: Source | str):
