@@ -17,5 +17,5 @@
   - [ ] Put a schema of the pipeline (Mermaid schema from Notion) + examples
   - [ ] Make a README in EN (default) and FR
 - [ ] Make the project available on PyPI
-- [ ] Bundle the simulator with the project
+- [x] Bundle the simulator with the project
 - [ ] Add a way to make an executable from the generated assembly?

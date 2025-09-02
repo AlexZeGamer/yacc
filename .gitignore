@@ -1,3 +1,14 @@
+# Python
 __pycache__/
 *.egg-info
+
+# C extensions
+*.so
 *.out
+*.o
+*.a
+*.asm
+
+# Simulator
+/msm/msm.exe
+/msm/msm
