@@ -25,7 +25,6 @@ class CodeGenerator:
         if not self._is_open:
             return
 
-        self.add_line("dbg")    # show the result in the end (takes the top of the stack)
         self.add_line("halt")   # stop execution
 
         self._is_open = False

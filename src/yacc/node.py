@@ -35,6 +35,11 @@ class NodeType(Enum):
     # Assignment
     NODE_AFFECT = auto()       # =
 
+    # Statements / blocks / debugging
+    NODE_DEBUG = auto()        # debug E;
+    NODE_BLOCK = auto()        # { I* }
+    NODE_DROP = auto()         # E;  (evaluate and drop)
+
 class Node:
     def __init__(self, nd_type: NodeType, value: int = None, children: list[Self] = []):
         self.type: NodeType = nd_type
@@ -73,21 +78,26 @@ class Node:
     # Dictionary of "easy nodes" for code generation
     # NodeType: (prefix_code, suffix_code)
     EN: dict[NodeType, tuple[str, str]] = {
-        NodeType.NODE_NOT:        (""      , "not"  ),
-        NodeType.NODE_NEG:        ("push 0", "sub"  ),
-        NodeType.NODE_ADD:        (""      , "add"  ),
-        NodeType.NODE_SUB:        (""      , "sub"  ),
-        NodeType.NODE_MUL:        (""      , "mul"  ),
-        NodeType.NODE_DIV:        (""      , "div"  ),
-        NodeType.NODE_MOD:        (""      , "mod"  ),
-        NodeType.NODE_AND:        (""      , "and"  ),
-        NodeType.NODE_OR:         (""      , "or"   ),
-        NodeType.NODE_EQ:         (""      , "cmpeq"),
-        NodeType.NODE_NOT_EQ:     (""      , "cmpne"),
-        NodeType.NODE_LOWER:      (""      , "cmplt"),
-        NodeType.NODE_LOWER_EQ:   (""      , "cmple"),
-        NodeType.NODE_GREATER:    (""      , "cmpgt"),
-        NodeType.NODE_GREATER_EQ: (""      , "cmpge"),
+        NodeType.NODE_NOT:        (""      , "not"   ),
+        NodeType.NODE_NEG:        ("push 0", "sub"   ),
+        # binary ops
+        NodeType.NODE_ADD:        (""      , "add"   ),
+        NodeType.NODE_SUB:        (""      , "sub"   ),
+        NodeType.NODE_MUL:        (""      , "mul"   ),
+        NodeType.NODE_DIV:        (""      , "div"   ),
+        NodeType.NODE_MOD:        (""      , "mod"   ),
+        NodeType.NODE_AND:        (""      , "and"   ),
+        NodeType.NODE_OR:         (""      , "or"    ),
+        NodeType.NODE_EQ:         (""      , "cmpeq" ),
+        NodeType.NODE_NOT_EQ:     (""      , "cmpne" ),
+        NodeType.NODE_LOWER:      (""      , "cmplt" ),
+        NodeType.NODE_LOWER_EQ:   (""      , "cmple" ),
+        NodeType.NODE_GREATER:    (""      , "cmpgt" ),
+        NodeType.NODE_GREATER_EQ: (""      , "cmpge" ),
+        # statements / helpers
+        NodeType.NODE_DEBUG:      (""      , "dbg"   ),
+        NodeType.NODE_BLOCK:      (""      , ""      ),  # children will just be added to the code with the loop
+        NodeType.NODE_DROP:       (""      , "drop 1"),
     }
 
     def __str__(self):

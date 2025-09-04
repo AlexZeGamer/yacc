@@ -11,7 +11,7 @@ class Parser:
         """Entry point"""
         if self.lexer.T is None or self.lexer.T.type == TokenType.TOK_EOF:
             return None
-        return self.E()
+        return self.I()
 
     # Grammar implementation
     def E(self, prio: int = 0) -> Node:
@@ -70,4 +70,23 @@ class Parser:
         """Parse expressions with unary suffix operators"""
         # S -> A
         return self.A() # TODO: implement suffix operators (function calls, array indexing)
-    
+
+    def I(self) -> Node:
+        """Parse an instruction ("expr;", block or debug)"""
+        # debug E ;
+        if self.lexer.check(TokenType.TOK_DEBUG):
+            N = self.E()
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+            return Node(NodeType.NODE_DEBUG, children=[N])
+
+        # { I* }
+        if self.lexer.check(TokenType.TOK_LBRACE):
+            block = Node(NodeType.NODE_BLOCK, children=[])
+            while not self.lexer.check(TokenType.TOK_RBRACE):
+                block.add_child(self.I())
+            return block
+
+        # E ;  => drop
+        N = self.E()
+        self.lexer.accept(TokenType.TOK_SEMICOLON)
+        return Node(NodeType.NODE_DROP, children=[N])
