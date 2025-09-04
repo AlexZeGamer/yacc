@@ -1,25 +1,25 @@
 from enum import Enum, auto
 
 class TokenType(Enum):
-    TOK_UNKNOWN = auto()       # token inconnu
+    TOK_UNKNOWN = auto()       # unknown token
 
     TOK_EOF = auto()           # end of file
-    TOK_CONST = (auto())       # constantes (entiers, pas besoin de gérer les réels etc) + valeur associée
-    TOK_IDENT = auto()         # identificateurs (variables, ...) + chaine associée
+    TOK_CONST = auto()         # constants (integers; no need to handle reals, etc.) + associated value
+    TOK_IDENT = auto()         # identifiers (variables, etc.) + associated string
 
-    # Opérateurs arithmétiques
+    # Arithmetic operators
     TOK_ADD = auto()           # +
     TOK_SUB = auto()           # -
     TOK_MUL = auto()           # *
     TOK_DIV = auto()           # /
     TOK_MOD = auto()           # %
 
-    # Opérateurs logiques
+    # Logical operators
     TOK_AND = auto()           # &&
     TOK_OR = auto()            # ||
     TOK_NOT = auto()           # !
 
-    # Opérateurs de comparaison
+    # Comparison operators
     TOK_EQ = auto()            # ==
     TOK_NOT_EQ = auto()        # !=
     TOK_LOWER = auto()         # <
@@ -27,7 +27,7 @@ class TokenType(Enum):
     TOK_GREATER = auto()       # >
     TOK_GREATER_EQ = auto()    # >=
 
-    # Parenthesage
+    # Parenthesization
     TOK_LPARENTHESIS = auto()  # (
     TOK_RPARENTHESIS = auto()  # )
     TOK_LBRACKET = auto()      # [
@@ -35,17 +35,17 @@ class TokenType(Enum):
     TOK_LBRACE = auto()        # {
     TOK_RBRACE = auto()        # }
 
-    # Affectation
+    # Assignment
     TOK_AFFECT = auto()        # =
 
-    # Séparateurs
+    # Separators
     TOK_SEMICOLON = auto()     # ;
     TOK_COMMA = auto()         # ,
 
-    # Adresse et valeur
+    # Address and value
     TOK_ADDRESS = auto()       # &
 
-    # Mots-clés
+    # Keywords
     TOK_INT = auto()           # int
     TOK_VOID = auto()          # void
     TOK_RETURN = auto()        # return
@@ -57,7 +57,7 @@ class TokenType(Enum):
     TOK_BREAK = auto()         # break
     TOK_CONTINUE = auto()      # continue
 
-    # Mots-clés supplémentaires
+    # Additional keywords
     TOK_DEBUG = auto()         # debug
     TOK_SEND = auto()          # send
     TOK_RECV = auto()          # recv

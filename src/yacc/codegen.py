@@ -51,14 +51,13 @@ class CodeGenerator:
         match node.type:
             case NodeType.NODE_CONST:
                 self.add_line(f"push {node.value}")
-            case NodeType.NODE_NOT:
-                if node.children:
-                    self.gennode(node.children[0])
-                self.add_line("not")
-            case NodeType.NODE_NEG:
-                self.add_line("push 0")
-                if node.children:
-                    self.gennode(node.children[0])
-                self.add_line("sub")
+            case _ if node.type in Node.EN:
+                prefix, suffix = Node.EN[node.type]
+                if prefix:
+                    self.add_line(prefix)
+                for child in node.children:
+                    self.gennode(child)
+                if suffix:
+                    self.add_line(suffix)
             case _:
-                pass
+                pass # TODO: raise compilation error
