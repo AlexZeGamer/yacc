@@ -121,18 +121,11 @@ class Node:
     
     def _str_beautify(self) -> str:
         """Return a beautified string representation of the tree (written with ChatGPT)."""
-        def label(n: Self) -> str:
-            if n.repr is not None:
-                return f"{n.type.name} {n.repr}"
-            if n.value is not None:
-                return f"{n.type.name} {n.value}"
-            return n.type.name
-
         lines: list[str] = []
 
         def walk(n: Self, prefix: str = "", is_last: bool = True):
             conn = "" if prefix == "" else ("└── " if is_last else "├── ")
-            lines.append(prefix + conn + label(n))
+            lines.append(prefix + conn + n._label())
             if n.children:
                 child_prefix = prefix + ("    " if is_last else "│   ")
                 last_idx = len(n.children) - 1
@@ -141,21 +134,48 @@ class Node:
 
         walk(self)
         return "\n".join(lines)
+    
+    def _str_mermaid(self) -> str:
+        """Return a mermaid string representation of the tree (written with ChatGPT)."""
+        lines: list[str] = ["graph TD"]
 
-    def print(self, beautify: bool = True) -> None:
-        if beautify:
-            Logger.log(self._str_beautify())
+        def node_id(n: Self) -> str:
+            return f"node{ id(n) }"
+
+        def walk(n: Self):
+            lines.append(f'    {node_id(n)}["{n._label()}"]')
+            for ch in n.children:
+                lines.append(f'    {node_id(n)} --> {node_id(ch)}')
+                walk(ch)
+
+        walk(self)
+        return "\n".join(lines)
+
+    def print(self, mode: bool = None) -> None:
+        if mode == "beautify":
+            string = self._str_beautify()
+        elif mode == "mermaid":
+            string = self._str_mermaid()
         else:
-            Logger.log(str(self))
+            string = str(self)
+
+        Logger.log(f"{string}\n")
+    
+    def _label(n: Self) -> str:
+        label = n.type.name
+        if n.repr is not None:  label += f" {n.repr}"
+        if n.value is not None: label += f" #{n.value}"
+        if n.index is not None: label += f" @{n.index}"
+        return label
 
     def __repr__(self) -> str:
-        parts = [f"Node(type={self.type.name}"]
-        if self.value is not None:
-            parts.append(f", value={self.value}")
-        if self.repr is not None:
-            parts.append(f", repr={self.repr!r}")
-        parts.append(f", children={len(self.children)})")
-        return "".join(parts)
+        return "".join([
+            f"Node(type={self.type.name}",
+            f", value={self.value}",
+            f", index={self.index}",
+            f", repr={self.repr!r}",
+            f", children={len(self.children)})",
+        ])
 
     def __len__(self) -> int:
         return len(self.children)
