@@ -42,12 +42,18 @@ class Parser:
             # The value is on T_prev after advancing
             value = self.lexer.T_prev.value
             return Node(NodeType.NODE_CONST, value=value, children=[])
+
         # (E)
         if self.lexer.check(TokenType.TOK_LPARENTHESIS):
             r = self.E()
             # require )
             self.lexer.accept(TokenType.TOK_RPARENTHESIS)
             return r
+
+        # <id>
+        if self.lexer.check(TokenType.TOK_IDENT):
+            return Node(NodeType.NODE_REF, repr=self.lexer.T_prev.repr)
+
         # error
         line, col = self.lexer.source_code.pos_to_line_col(self.lexer.pos)
         raise SyntaxError(
@@ -88,6 +94,13 @@ class Parser:
             while not self.lexer.check(TokenType.TOK_RBRACE):
                 block.add_child(self.I())
             return block
+
+        # int <id> ; (declaration)
+        if self.lexer.check(TokenType.TOK_INT):
+            N = Node(NodeType.NODE_DECLARE, repr=self.lexer.T.repr)
+            self.lexer.accept(TokenType.TOK_IDENT)
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+            return N
 
         # E ;  => drop
         N = self.E()

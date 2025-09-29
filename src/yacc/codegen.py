@@ -40,24 +40,62 @@ class CodeGenerator:
         else:
             raise ValueError("No output path specified for code generation.")
 
-    def codegen(self, node: Node) -> None:
+    def codegen(self, node: Node, nbVars: int = 0) -> None:
         """One code generation step (entry point of the compilation pipeline)"""
-        if node is not None:
-            self.gennode(node)
+        self.add_line(f"resn {nbVars}") # reserve space for variables
+        self.gennode(node)
+        self.add_line(f"drop {nbVars}") # clean up variable space
 
     def gennode(self, node: Node) -> None:
         """Generate code for a single AST node (recursive)"""
-
         match node.type:
-            case NodeType.NODE_CONST:
-                self.add_line(f"push {node.value}")
+            case NodeType.NODE_AFFECT:
+                self.gennode(node.children[1])
+                self.add_line("dup")
+                self.add_line(f"set {node.children[0].index}")
+
             case _ if node.type in Node.EN:
                 prefix, suffix = Node.EN[node.type]
                 if prefix:
-                    self.add_line(prefix)
+                    self.add_line(self._expand(prefix, node))
                 for child in node.children:
                     self.gennode(child)
                 if suffix:
-                    self.add_line(suffix)
+                    self.add_line(self._expand(suffix, node))
+
             case _:
-                pass # TODO: raise compilation error
+                raise ValueError(f"Code generation not implemented for node type: {node.type.name}")
+
+    @staticmethod
+    def _expand(template: str, node: Node) -> str:
+        """
+        Expand a template string by replacing placeholders.
+
+        Placeholders:
+        - '@': the node index if defined, otherwise the first child's index if any, else '0'
+        - '#': the node value
+        """
+        at_value = None
+        if node.index is not None:
+            at_value = str(node.index)
+        elif node.children and node.children[0].index is not None:
+            # use the first child's index as a fallback
+            # this is useful for nodes that do not store their own index
+            # (e.g., ND_AFFECT nodes use the index of their ND_REF child)
+            at_value = str(node.children[0].index)
+
+        hash_value = str(node.value)
+
+        if (
+            (at_value is None and "@" in template) or
+            (hash_value is None and "#" in template)
+        ):
+            raise ValueError(f"Cannot expand template: \"{template}\" with node: {node.__repr__()}")
+    
+        expanded = template
+        if at_value is not None:
+            expanded = expanded.replace("@", at_value)
+        if hash_value is not None:
+            expanded = expanded.replace("#", hash_value)
+
+        return expanded

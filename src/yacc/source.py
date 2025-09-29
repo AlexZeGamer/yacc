@@ -33,6 +33,13 @@ class Source:
             else:
                 col += 1
         return line, col
+
+    def get_line(self, line_number: int) -> str:
+        """Return the content of a specific line (starting from 1)."""
+        lines = self.text.splitlines()
+        if 1 <= line_number <= len(lines):
+            return lines[line_number - 1]
+        raise IndexError(f"Line {line_number} out of range (1-{len(lines)})")
     
     def __len__(self):
         """Return the length of the source text."""

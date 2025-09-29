@@ -32,7 +32,9 @@ class NodeType(Enum):
     NODE_GREATER = auto()      # a >  b
     NODE_GREATER_EQ = auto()   # a >= b
 
-    # Assignment
+    # Symbols
+    NODE_DECLARE = auto()         # declaration of a variable
+    NODE_REF = auto()          # reference to a variable
     NODE_AFFECT = auto()       # a = b (assignment)
 
     # Statements / blocks / debugging
@@ -41,10 +43,11 @@ class NodeType(Enum):
     NODE_DROP = auto()         # E;  (evaluate and drop)
 
 class Node:
-    def __init__(self, nd_type: NodeType, value: int = None, children: list[Self] = []):
+    def __init__(self, nd_type: NodeType, value: int = None, repr: int = None, index: int = None, children: list[Self] = []):
         self.type: NodeType = nd_type
         self.value: int = value
-        self.repr: str = None
+        self.repr: str = repr
+        self.index: int = index
         self.children: list[Self] = children
 
     # Dictionary of binary operators for priority parsing
@@ -77,7 +80,11 @@ class Node:
 
     # Dictionary of "easy nodes" for code generation
     # NodeType: (prefix_code, suffix_code)
+    # @ = index of variable, # = value of constant
     EN: dict[NodeType, tuple[str, str]] = {
+        # constants
+        NodeType.NODE_CONST:      ("push #", ""      ),
+        # unary ops
         NodeType.NODE_NOT:        (""      , "not"   ),
         NodeType.NODE_NEG:        ("push 0", "sub"   ),
         # binary ops
@@ -94,6 +101,9 @@ class Node:
         NodeType.NODE_LOWER_EQ:   (""      , "cmple" ),
         NodeType.NODE_GREATER:    (""      , "cmpgt" ),
         NodeType.NODE_GREATER_EQ: (""      , "cmpge" ),
+        # symbols
+        NodeType.NODE_DECLARE:    (""      , ""      ),  # no code needed
+        NodeType.NODE_REF:        ("get @" , ""      ),  # get @index
         # statements / helpers
         NodeType.NODE_DEBUG:      (""      , "dbg"   ),
         NodeType.NODE_BLOCK:      (""      , ""      ),  # children will just be added to the code with the loop

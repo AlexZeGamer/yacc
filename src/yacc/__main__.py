@@ -31,7 +31,7 @@ def main():
         A = parser.parse()
         A = sema.analyze(A)
         A = optimizer.optimize(A)
-        codegen.codegen(A)
+        codegen.codegen(A, nbVars=sema.symbol_table.nbVars)
     codegen._finalize()
 
 
