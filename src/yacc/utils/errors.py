@@ -46,7 +46,7 @@ class CompilationError(Exception):
 
 def silent_hook(exc_type, exc, tb):
     if issubclass(exc_type, CompilationError):
-        print(exc) # print only the error message, without traceback
+        print(exc, file=sys.stderr) # print only the error message, without traceback
     else:
         sys.__excepthook__(exc_type, exc, tb)
 

@@ -5,18 +5,26 @@ from .source import Source
 from .lexer import Lexer
 
 from .utils.errors import CompilationError
+from .utils.logger import Logger
 
 class Parser:
 
-    def __init__(self, lexer: Lexer, source_code: Source = None):
-        self.lexer = lexer or Lexer(source_code)
+    def __init__(self, lexer: Lexer, source_code: Source = None, verbose: bool = False):
+        self.lexer = lexer or Lexer(source_code, verbose)
         self.source_code = source_code
+        self.verbose = verbose
 
     def parse(self) -> Node:
         """Entry point"""
         if self.lexer.T is None or self.lexer.T.type == TokenType.TOK_EOF:
             return None
-        return self.I()
+        
+        N: Node = self.I()
+        if self.verbose:
+            Logger.log("Syntax analysis / Parsing (AST):")
+            N.print(mode="beautify")
+        
+        return N
 
     # Grammar implementation
     def E(self, prio: int = 0) -> Node:

@@ -1,4 +1,5 @@
 from typing import Self
+import sys
 
 class Source:
     def __init__(self, text: str, name: str = "<stdin>"):
@@ -18,7 +19,6 @@ class Source:
     @classmethod
     def from_stdin(cls) -> Self:
         """Create a Source by reading all data from standard input."""
-        import sys
         data = sys.stdin.read()
         return cls(data, name="<stdin>")
 

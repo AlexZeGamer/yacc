@@ -3,6 +3,8 @@ from typing import Self
 
 from .token import TokenType
 
+from .utils.logger import Logger
+
 class NodeType(Enum):
     NODE_UNKNOWN = auto()      # unknown node
 
@@ -142,9 +144,9 @@ class Node:
 
     def print(self, beautify: bool = True) -> None:
         if beautify:
-            print(self._str_beautify())
+            Logger.log(self._str_beautify())
         else:
-            print(str(self))
+            Logger.log(str(self))
 
     def __repr__(self) -> str:
         parts = [f"Node(type={self.type.name}"]

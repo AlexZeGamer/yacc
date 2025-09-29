@@ -4,12 +4,13 @@ from .source import Source
 from .utils.errors import CompilationError
 
 class CodeGenerator:
-    def __init__(self, output_path: str = None, to_stdout: bool = False, source_code: Source = None) -> None:
+    def __init__(self, output_path: str = None, to_stdout: bool = False, source_code: Source = None, verbose: bool = False) -> None:
         self._lines: list[str] = []
         self._is_open: bool = False
         self.output_path = output_path
         self._to_stdout = to_stdout
         self.source_code = source_code
+        self.verbose = verbose
 
     def add_line(self, line: str) -> None:
         """Add one line to the buffer"""

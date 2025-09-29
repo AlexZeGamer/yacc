@@ -3,17 +3,24 @@ from .symbol import SymbolTable
 from .source import Source
 
 from .utils.errors import CompilationError
+from .utils.logger import Logger
 
 class SemanticAnalyzer:
-    def __init__(self, symbol_table: SymbolTable = None, source_code: Source = None):
+    def __init__(self, symbol_table: SymbolTable = None, source_code: Source = None, verbose: bool = False):
         self.symbol_table = symbol_table or SymbolTable()
         self.source_code = source_code
+        self.verbose = verbose
 
     def analyze(self, node: Node) -> Node:
         self.symbol_table.nbVars = 0
+
         self._analyze_node(node)
+        if self.verbose:
+            Logger.log("Semantic analysis (AST with symbol info):")
+            node.print(mode="beautify")
+        
         return node
-    
+
     def _analyze_node(self, node: Node) -> None:
         match node.type:
             case NodeType.NODE_BLOCK:

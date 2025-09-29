@@ -1,12 +1,16 @@
 import argparse
 
 from .source import Source
-from .lexer import Lexer
 from .token import TokenType
+
+from .lexer import Lexer
 from .parser import Parser
 from .sema import SemanticAnalyzer
 from .optimizer import Optimizer
 from .codegen import CodeGenerator
+
+from .utils.errors import CompilationError
+from .utils.logger import Logger
 
 def main():
     """
@@ -17,14 +21,15 @@ def main():
     """
 
     args = parse_args()
+    verbose = args.debug
+    if verbose:
+        Logger.log(f"Compiling to {'stdout' if args.to_stdout else args.output}\n")
 
-    # print(f"Compiling to {'stdout' if args.to_stdout else args.output}")
-
-    lexer = Lexer(source_code=args.source_code)
-    parser = Parser(lexer, source_code=args.source_code)
-    sema = SemanticAnalyzer(source_code=args.source_code)
-    optimizer = Optimizer(source_code=args.source_code)
-    codegen = CodeGenerator(to_stdout=args.to_stdout, output_path=args.output, source_code=args.source_code)
+    lexer = Lexer(source_code=args.source_code, verbose=verbose)
+    parser = Parser(lexer, source_code=args.source_code, verbose=verbose)
+    sema = SemanticAnalyzer(source_code=args.source_code, verbose=verbose)
+    optimizer = Optimizer(source_code=args.source_code, verbose=verbose)
+    codegen = CodeGenerator(to_stdout=args.to_stdout, output_path=args.output, source_code=args.source_code, verbose=verbose)
 
     codegen._start()
     while lexer.T.type != TokenType.TOK_EOF:
@@ -47,6 +52,7 @@ def parse_args() -> argparse.Namespace:
     mx = ap.add_mutually_exclusive_group()
     mx.add_argument("--string", "--str", dest="input_string", default=None, help="Compile code provided as a string")
     mx.add_argument("--stdin", dest="read_stdin", action="store_true", help="Read input code from standard input")
+    ap.add_argument("--debug", "--verbose", "-v", dest="debug", action="store_true", help="Enable debug mode (verbose output)")
     args = ap.parse_args()
 
     # Check that only one input source is given: positional, -i/--input, --string, --stdin
