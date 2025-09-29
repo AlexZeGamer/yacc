@@ -4,6 +4,8 @@ from .source import Source
 
 from .lexer import Lexer
 
+from .utils.errors import CompilationError
+
 class Parser:
 
     def __init__(self, lexer: Lexer, source_code: Source = None):

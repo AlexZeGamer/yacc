@@ -1,6 +1,8 @@
 from .token import Token, TokenType
 from .source import Source
 
+from .utils.errors import CompilationError
+
 class Lexer:
     def __init__(self, source_code: Source = None):
         self.source_code: Source = source_code
@@ -8,6 +10,8 @@ class Lexer:
         self.T: Token = None
         self.T_prev: Token = None
         self.next()
+        if self.T is None:
+            raise CompilationError("No tokens found in the source code")
 
     def next(self) -> None:
         """Read the next token from the source code and update global T and T_prev."""
@@ -44,7 +48,7 @@ class Lexer:
                         self.pos += 1
                     if not closed:
                         line, col = self.source_code.pos_to_line_col(start_pos)
-                        raise SyntaxError(f"Unterminated comment starting at line {line}, column {col}")
+                        raise CompilationError("Unterminated comment", line=line, col=col, line_str=self.source_code.get_line(line))
                     
                     # loop again to skip following whitespace/comments
                     continue
@@ -109,4 +113,5 @@ class Lexer:
         """Accept the current token if it matches the given type, else raise an error."""
         if not self.check(type):
             line, col = self.source_code.pos_to_line_col(self.pos)
-            raise SyntaxError(f"Unexpected token \"{self.T.repr}\" at line {line}, column {col}, expected \"{type}\"")
+            raise CompilationError(f"Unexpected token \"{self.T.repr}\", expected \"{type}\"", line=line, col=col, line_str=self.source_code.get_line(line))
+

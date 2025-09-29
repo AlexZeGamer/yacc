@@ -2,6 +2,8 @@ from .node import Node, NodeType
 from .symbol import SymbolTable
 from .source import Source
 
+from .utils.errors import CompilationError
+
 class SemanticAnalyzer:
     def __init__(self, symbol_table: SymbolTable = None, source_code: Source = None):
         self.symbol_table = symbol_table or SymbolTable()
@@ -21,7 +23,10 @@ class SemanticAnalyzer:
                 self.symbol_table.end_scope()
 
             case NodeType.NODE_DECLARE:
-                self.symbol_table.declare(node.repr)
+                try:
+                    self.symbol_table.declare(node.repr)
+                except ValueError as e:
+                    raise CompilationError(str(e))
 
             case NodeType.NODE_REF:
                 symbol = self.symbol_table.find(node.repr)

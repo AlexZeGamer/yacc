@@ -1,6 +1,8 @@
 from .node import Node, NodeType
 from .source import Source
 
+from .utils.errors import CompilationError
+
 class CodeGenerator:
     def __init__(self, output_path: str = None, to_stdout: bool = False, source_code: Source = None) -> None:
         self._lines: list[str] = []
@@ -64,7 +66,7 @@ class CodeGenerator:
                     self.add_line(self._expand(suffix, node))
 
             case _:
-                raise ValueError(f"Code generation not implemented for node type: {node.type.name}")
+                raise CompilationError(f"Code generation not implemented for node type: {node.type.name}")
 
     @staticmethod
     def _expand(template: str, node: Node) -> str:
