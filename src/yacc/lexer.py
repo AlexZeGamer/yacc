@@ -2,8 +2,8 @@ from .token import Token, TokenType
 from .source import Source
 
 class Lexer:
-    def __init__(self, source_code: Source | str):
-        self.source_code: Source = Source.from_path(source_code) if isinstance(source_code, str) else source_code
+    def __init__(self, source_code: Source = None):
+        self.source_code: Source = source_code
         self.pos: int = 0
         self.T: Token = None
         self.T_prev: Token = None

@@ -100,7 +100,7 @@ class Node:
         NodeType.NODE_DROP:       (""      , "drop 1"),
     }
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = "(" + self.type.name
         for child in self.children:
             result += " " + str(child)

@@ -9,27 +9,29 @@ from .optimizer import Optimizer
 from .codegen import CodeGenerator
 
 def main():
-    """Main function to handle argument parsing and compilation pipeline."""
+    """
+    Main function to handle argument parsing and compilation pipeline.
+    
+    Pipeline:
+    Lexer -> Parser -> SemanticAnalyzer -> Optimizer -> CodeGenerator
+    """
+
     args = parse_args()
 
     # print(f"Compiling to {'stdout' if args.to_stdout else args.output}")
 
-    lexer = Lexer(args.source_code)
-    if lexer.T is None:
-        print("No tokens found.")
-        return
-
-    parser = Parser(lexer)
-    sema = SemanticAnalyzer()
-    optimizer = Optimizer()
-    if args.to_stdout:
-        codegen = CodeGenerator(to_stdout=True)
-    else:
-        codegen = CodeGenerator(output_path=args.output)
+    lexer = Lexer(source_code=args.source_code)
+    parser = Parser(lexer, source_code=args.source_code)
+    sema = SemanticAnalyzer(source_code=args.source_code)
+    optimizer = Optimizer(source_code=args.source_code)
+    codegen = CodeGenerator(to_stdout=args.to_stdout, output_path=args.output, source_code=args.source_code)
 
     codegen._start()
     while lexer.T.type != TokenType.TOK_EOF:
-        codegen.codegen(parser, sema, optimizer)
+        A = parser.parse()
+        A = sema.analyze(A)
+        A = optimizer.optimize(A)
+        codegen.codegen(A)
     codegen._finalize()
 
 

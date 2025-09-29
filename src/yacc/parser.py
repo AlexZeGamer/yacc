@@ -1,11 +1,14 @@
 from .token import Token, TokenType
 from .node import Node, NodeType
+from .source import Source
+
 from .lexer import Lexer
 
 class Parser:
-    def __init__(self, lexer: Lexer = None):
-        self.lexer = lexer or Lexer("")
-        self.current_token: Token = lexer.T
+
+    def __init__(self, lexer: Lexer, source_code: Source = None):
+        self.lexer = lexer or Lexer(source_code)
+        self.source_code = source_code
 
     def parse(self) -> Node:
         """Entry point"""

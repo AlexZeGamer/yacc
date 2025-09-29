@@ -1,11 +1,13 @@
 from .node import Node, NodeType
+from .source import Source
 
 class CodeGenerator:
-    def __init__(self, output_path: str = None, to_stdout: bool = False) -> None:
+    def __init__(self, output_path: str = None, to_stdout: bool = False, source_code: Source = None) -> None:
         self._lines: list[str] = []
         self._is_open: bool = False
         self.output_path = output_path
         self._to_stdout = to_stdout
+        self.source_code = source_code
 
     def add_line(self, line: str) -> None:
         """Add one line to the buffer"""
@@ -38,11 +40,10 @@ class CodeGenerator:
         else:
             raise ValueError("No output path specified for code generation.")
 
-    def codegen(self, parser, sema, optimizer) -> None:
-        """One code generation step"""
-        A = optimizer.optimize(sema.analyze(parser.parse()))
-        if A is not None:
-            self.gennode(A)
+    def codegen(self, node: Node) -> None:
+        """One code generation step (entry point of the compilation pipeline)"""
+        if node is not None:
+            self.gennode(node)
 
     def gennode(self, node: Node) -> None:
         """Generate code for a single AST node (recursive)"""
