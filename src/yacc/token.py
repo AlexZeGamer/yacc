@@ -112,7 +112,7 @@ class Token:
         self.value: int = value
         self.repr: str = repr
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"Token: "
             f"type = {self.type.name:<18} "
@@ -120,7 +120,7 @@ class Token:
             f"repr = {self.repr.replace('\n', '\\n') if self.repr else None}"
         )
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Token(type={self.type}, value={self.value}, repr={self.repr.replace('\n', '\\n') if self.repr else None})"
         )

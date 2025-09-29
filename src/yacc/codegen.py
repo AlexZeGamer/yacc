@@ -20,7 +20,7 @@ class CodeGenerator:
         self._lines = []
         self.add_line(".start")
 
-    def _finalize(self):
+    def _finalize(self) -> None:
         """End generation by adding suffix lines and write to file or stdout."""
         if not self._is_open:
             return
@@ -44,7 +44,7 @@ class CodeGenerator:
         if A is not None:
             self.gennode(A)
 
-    def gennode(self, node) -> None:
+    def gennode(self, node: Node) -> None:
         """Generate code for a single AST node (recursive)"""
 
         match node.type:

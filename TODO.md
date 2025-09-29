@@ -7,7 +7,7 @@
 - [x] Add a way to get the input from a string
 - [x] Add a way to get the input from stdin
 - [ ] Add verbose/debug modes
-  - [ ] Think about how to handle verbose mode being enabled the the same time as --stdout (print to stderr?)
+  - [ ] Think about how to handle verbose mode being enabled the the same time as --stdout (~~print to stderr?~~, detect pipes?)
 - [ ] Add tests for lexer, parser, optimizer, codegen
 - [x] Add a way to print trees beautifully (for debug)
 - [ ] Improve error handling and reporting for compilation errors
@@ -19,3 +19,7 @@
 - [ ] Make the project available on PyPI
 - [x] Bundle the simulator with the project
 - [ ] Add a way to make an executable from the generated assembly?
+- [ ] Code readability improvements
+  - [x] Add type hints everywhere
+  - [ ] Add docstrings to all methods and classes
+  - [ ] Rename some minifications (e.g. parser functions)

@@ -25,15 +25,15 @@ class NodeType(Enum):
     NODE_OR = auto()           # logical OR
 
     # Comparison operators
-    NODE_EQ = auto()           # ==
-    NODE_NOT_EQ = auto()       # !=
-    NODE_LOWER = auto()        # <
-    NODE_LOWER_EQ = auto()     # <=
-    NODE_GREATER = auto()      # >
-    NODE_GREATER_EQ = auto()   # >=
+    NODE_EQ = auto()           # a == b
+    NODE_NOT_EQ = auto()       # a != b
+    NODE_LOWER = auto()        # a <  b
+    NODE_LOWER_EQ = auto()     # a <= b
+    NODE_GREATER = auto()      # a >  b
+    NODE_GREATER_EQ = auto()   # a >= b
 
     # Assignment
-    NODE_AFFECT = auto()       # =
+    NODE_AFFECT = auto()       # a = b (assignment)
 
     # Statements / blocks / debugging
     NODE_DEBUG = auto()        # debug E;
@@ -130,13 +130,13 @@ class Node:
         walk(self)
         return "\n".join(lines)
 
-    def print(self, beautify: bool = True):
+    def print(self, beautify: bool = True) -> None:
         if beautify:
             print(self._str_beautify())
         else:
             print(str(self))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         parts = [f"Node(type={self.type.name}"]
         if self.value is not None:
             parts.append(f", value={self.value}")
@@ -145,8 +145,8 @@ class Node:
         parts.append(f", children={len(self.children)})")
         return "".join(parts)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.children)
 
-    def add_child(self, child: Self):
+    def add_child(self, child: Self) -> None:
         self.children.append(child)

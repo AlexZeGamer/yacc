@@ -9,7 +9,7 @@ class Lexer:
         self.T_prev: Token = None
         self.next()
 
-    def next(self):
+    def next(self) -> None:
         """Read the next token from the source code and update global T and T_prev."""
         self.T_prev = self.T
         
@@ -105,7 +105,7 @@ class Lexer:
             return True
         return False
 
-    def accept(self, type: TokenType):
+    def accept(self, type: TokenType) -> None:
         """Accept the current token if it matches the given type, else raise an error."""
         if not self.check(type):
             line, col = self.source_code.pos_to_line_col(self.pos)
