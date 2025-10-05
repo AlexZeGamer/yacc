@@ -11,6 +11,7 @@ class CodeGenerator:
         self._to_stdout = to_stdout
         self.source_code = source_code
         self.verbose = verbose
+        self._label_counter: int = 0
 
     def add_line(self, line: str) -> None:
         """Add one line to the buffer"""
@@ -23,6 +24,7 @@ class CodeGenerator:
         self._is_open = True
 
         self._lines = []
+        self._label_counter = 0
         self.add_line(".start")
 
     def _finalize(self) -> None:
@@ -56,6 +58,27 @@ class CodeGenerator:
                 self.gennode(node.children[1])
                 self.add_line("dup")
                 self.add_line(f"set {node.children[0].index}")
+
+            case NodeType.NODE_COND:
+                label_id = self._next_label_id()
+                false_label = self._format_label(label_id, "else")
+                end_label = self._format_label(label_id, "end")
+
+                # evaluate condition
+                self.gennode(node.children[0])
+
+                # if false, jump to else (or end if no else)
+                self.add_line(f"jumpf {false_label}")
+                self.gennode(node.children[1])
+
+                # (optional) else instruction
+                if len(node.children) > 2 and node.children[2] is not None:
+                    self.add_line(f"jump {end_label}")
+                    self.add_line(f".{false_label}")
+                    self.gennode(node.children[2])
+                    self.add_line(f".{end_label}")
+                else:
+                    self.add_line(f".{false_label}")
 
             case _ if node.type in Node.EN:
                 prefix, suffix = Node.EN[node.type]
@@ -102,3 +125,12 @@ class CodeGenerator:
             expanded = expanded.replace("#", hash_value)
 
         return expanded
+
+    def _next_label_id(self) -> int:
+        label_id = self._label_counter
+        self._label_counter += 1
+        return label_id
+
+    @staticmethod
+    def _format_label(label_id: int, suffix: str) -> str:
+        return f"L{label_id}_{suffix}"

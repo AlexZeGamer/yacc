@@ -43,14 +43,15 @@ class NodeType(Enum):
     NODE_DEBUG = auto()        # debug E;
     NODE_BLOCK = auto()        # { I* }
     NODE_DROP = auto()         # E;  (evaluate and drop)
+    NODE_COND = auto()         # conditional if/else
 
 class Node:
-    def __init__(self, nd_type: NodeType, value: int = None, repr: int = None, index: int = None, children: list[Self] = []):
+    def __init__(self, nd_type: NodeType, value: int = None, repr: int = None, index: int = None, children: list[Self] | None = None):
         self.type: NodeType = nd_type
         self.value: int = value
         self.repr: str = repr
         self.index: int = index
-        self.children: list[Self] = children
+        self.children: list[Self] = children if children is not None else []
 
     # Dictionary of binary operators for priority parsing
     # operator: (priority, priority for right argument, corresponding NodeType)

@@ -29,7 +29,7 @@ class Parser:
     # Grammar implementation
     def E(self, prio: int = 0) -> Node:
         """Parse binary operations expressions"""
-        N = self.P()  # first argument
+        N: Node = self.P()  # first argument
 
         # continue parsing binary operations as long as the next token is a binary operator with right priority
         while self.lexer.T and self.lexer.T.type in Node.OP:
@@ -40,7 +40,7 @@ class Parser:
             M = self.E(
                 Node.OP[op_tok]["prio_arg"]
             )  # second argument (can be another expression)
-            N = Node(Node.OP[op_tok]["ntype"], children=[N, M])
+            N: Node = Node(Node.OP[op_tok]["ntype"], children=[N, M])
 
         return N
 
@@ -94,7 +94,7 @@ class Parser:
         """Parse an instruction ("expr;", block or debug)"""
         # debug E ;
         if self.lexer.check(TokenType.TOK_DEBUG):
-            N = self.E()
+            N: Node = self.E()
             self.lexer.accept(TokenType.TOK_SEMICOLON)
             return Node(NodeType.NODE_DEBUG, children=[N])
 
@@ -105,14 +105,34 @@ class Parser:
                 block.add_child(self.I())
             return block
 
+        # if (E) I [else I]?
+        if self.lexer.check(TokenType.TOK_IF):
+            N: Node = Node(NodeType.NODE_COND)
+
+            # evaluate condition
+            self.lexer.accept(TokenType.TOK_LPARENTHESIS)
+            cond = self.E()
+            N.add_child(cond)
+            self.lexer.accept(TokenType.TOK_RPARENTHESIS)
+
+            # then instruction
+            then_instr = self.I()
+            N.add_child(then_instr)
+
+            # (optional) else instruction
+            if self.lexer.check(TokenType.TOK_ELSE):
+                N.add_child(self.I())
+            
+            return N
+
         # int <id> ; (declaration)
         if self.lexer.check(TokenType.TOK_INT):
-            N = Node(NodeType.NODE_DECLARE, repr=self.lexer.T.repr)
+            N: Node = Node(NodeType.NODE_DECLARE, repr=self.lexer.T.repr)
             self.lexer.accept(TokenType.TOK_IDENT)
             self.lexer.accept(TokenType.TOK_SEMICOLON)
             return N
 
         # E ;  => drop
-        N = self.E()
+        N: Node = self.E()
         self.lexer.accept(TokenType.TOK_SEMICOLON)
         return Node(NodeType.NODE_DROP, children=[N])

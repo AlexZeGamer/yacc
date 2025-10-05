@@ -44,7 +44,13 @@ class SemanticAnalyzer:
                     raise ValueError(f"{node.children[0].repr} is not a variable")
                 for child in node.children:
                     self._analyze_node(child)
-            
+
+            case NodeType.NODE_COND:
+                self._analyze_node(node.children[0]) # condition
+                self._analyze_node(node.children[1]) # then branch
+                if len(node.children) > 2:
+                    self._analyze_node(node.children[2]) # else branch
+
             case _:
                 for child in node.children:
                     self._analyze_node(child)
