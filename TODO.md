@@ -6,16 +6,20 @@
 - [x] Add a arg to output the generated assembly to stdout
 - [x] Add a way to get the input from a string
 - [x] Add a way to get the input from stdin
-- [ ] Add verbose/debug modes
-  - [ ] Think about how to handle verbose mode being enabled the the same time as --stdout (~~print to stderr?~~, detect pipes?)
+- [x] Add verbose/debug modes
+  - [x] Think about how to handle verbose mode being enabled the the same time as --stdout (print to stderr?)
 - [ ] Add tests for lexer, parser, optimizer, codegen
 - [x] Add a way to print trees beautifully (for debug)
 - [ ] Improve error handling and reporting for compilation errors
+  - [x] Make a custom error class for compilation errors, with line/column info, etc.
+  - [x] Make error messages more user-friendly (show line of code, point to error position, etc.)
   - [ ] Make explicit error classes for different error types (LexerError, ParserError, SemanticError, etc.)
   - [ ] Add line/column info to all errors (requires adding position tracking in tokens)
-- [ ] Write a README.md (project overview, how to run, how to install, how to run tests, what's implemented & what's missing, etc.)
-  - [ ] Put a schema of the pipeline (Mermaid schema from Notion) + examples
-  - [ ] Make a README in EN (default) and FR
+- [x] Write a README.md (project overview, how to run, how to install, how to run tests, what's implemented & what's missing, etc.)
+  - [x] Put a schema of the pipeline (Mermaid schema from Notion) + examples
+  - [x] Make a README in EN (default) and FR
+  - [ ] Add a detailed feature list (what's implemented, what's missing, what's planned)
+  - [ ] Add how to run the tests in the README (once tests are done)
 - [ ] Make the project available on PyPI
 - [x] Bundle the simulator with the project
 - [ ] Add a way to make an executable from the generated assembly?
