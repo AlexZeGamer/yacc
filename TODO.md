@@ -27,3 +27,4 @@
   - [x] Add type hints everywhere
   - [ ] Add docstrings to all methods and classes
   - [ ] Rename some minifications (e.g. parser functions)
+- [ ] Make sure labels in codegen follow an unambiguous pattern (different for if, loops, and functions) using chars unallowed in C identifiers
