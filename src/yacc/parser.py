@@ -18,13 +18,41 @@ class Parser:
         """Entry point"""
         if self.lexer.T is None or self.lexer.T.type == TokenType.TOK_EOF:
             return None
-        
-        N: Node = self.I()
+
+        N: Node = self.F()
         if self.verbose:
             Logger.log("Syntax analysis / Parsing (AST):")
             N.print(mode="beautify")
-        
+
         return N
+
+    def F(self) -> Node:
+        """Parse one function definition"""
+        self.lexer.accept(TokenType.TOK_INT)
+        self.lexer.accept(TokenType.TOK_IDENT)
+        func_name = self.lexer.T_prev.repr
+
+        func_node = Node(NodeType.NODE_FUNCTION, repr=func_name, children=[])
+
+        self.lexer.accept(TokenType.TOK_LPARENTHESIS)
+        if not self.lexer.check(TokenType.TOK_RPARENTHESIS):
+            func_node.children.extend(self._parse_function_parameters())
+            self.lexer.accept(TokenType.TOK_RPARENTHESIS)
+
+        body = self.I()
+        func_node.add_child(body)
+        return func_node
+
+    def _parse_function_parameters(self) -> list[Node]:
+        params: list[Node] = []
+        while True:
+            self.lexer.accept(TokenType.TOK_INT)
+            self.lexer.accept(TokenType.TOK_IDENT)
+            ident = self.lexer.T_prev.repr
+            params.append(Node(NodeType.NODE_DECLARE, repr=ident))
+            if not self.lexer.check(TokenType.TOK_COMMA):
+                break
+        return params
 
     # Grammar implementation
     def E(self, prio: int = 0) -> Node:
@@ -89,6 +117,10 @@ class Parser:
         """Parse expressions with unary suffix operators"""
         node = self.A()
         while True:
+            if self.lexer.check(TokenType.TOK_LPARENTHESIS):
+                args = self._parse_call_arguments()
+                node = Node(NodeType.NODE_CALL, children=[node, *args])
+                continue
             if self.lexer.check(TokenType.TOK_INC):
                 node = self._make_inc_dec_node(node, delta=1)
                 continue
@@ -97,6 +129,19 @@ class Parser:
                 continue
             break
         return node
+
+    def _parse_call_arguments(self) -> list[Node]:
+        """Helper to parse function call arguments"""
+        args: list[Node] = []
+        if self.lexer.check(TokenType.TOK_RPARENTHESIS):
+            return args
+        while True:
+            args.append(self.E())
+            if self.lexer.check(TokenType.TOK_COMMA):
+                continue
+            self.lexer.accept(TokenType.TOK_RPARENTHESIS)
+            break
+        return args
 
     def I(self) -> Node:
         """Parse an instruction ("expr;", block or debug)"""
@@ -223,6 +268,12 @@ class Parser:
         if self.lexer.check(TokenType.TOK_CONTINUE):
             self.lexer.accept(TokenType.TOK_SEMICOLON)
             return Node(NodeType.NODE_CONTINUE)
+
+        # return E;
+        if self.lexer.check(TokenType.TOK_RETURN):
+            expr = self.E()
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+            return Node(NodeType.NODE_RETURN, children=[expr])
 
         # E ;  => drop
         N: Node = self.E()

@@ -27,4 +27,19 @@
   - [x] Add type hints everywhere
   - [ ] Add docstrings to all methods and classes
   - [ ] Rename some minifications (e.g. parser functions)
+  - [ ] Rename (with an underscore before) or move to their own directory all Python files that are not steps of the pipeline (e.g. utils, errors, node/token classes, etc.)
 - [ ] Make sure labels in codegen follow an unambiguous pattern (different for if, loops, and functions) using chars unallowed in C identifiers
+- [ ] Add required features
+  - [x] Opérateurs unaires (préfixes/suffixes) & parenthèses
+  - [x] Opérateurs binaires
+  - [x] Instructions
+  - [x] Symboles
+  - [x] Conditionnels
+  - [x] Boucles
+  - [x] Fonctions
+  - [ ] Pointeurs & Tableaux
+  - [ ] Bibliothèque standard
+    - [ ] Malloc / free
+    - [ ] Print
+- [ ] Add facultative features
+  - [ ] one-line declarations with initialization not working (e.g. `int a = 5;`)

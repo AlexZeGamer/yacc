@@ -13,6 +13,7 @@ class CodeGenerator:
         self.verbose = verbose
         self._label_counter: int = 0
         self._loop_stack: list[dict[str, str]] = []
+        self._has_main: bool = False
 
     def add_line(self, line: str) -> None:
         """Add one line to the buffer"""
@@ -27,14 +28,19 @@ class CodeGenerator:
         self._lines = []
         self._label_counter = 0
         self._loop_stack = []
+        self._has_main = False
         self.add_line(".start")
+        self.add_line("prep main")
+        self.add_line("call 0")
+        self.add_line("halt")
 
     def _finalize(self) -> None:
         """End generation by adding suffix lines and write to file or stdout."""
         if not self._is_open:
             return
 
-        self.add_line("halt")   # stop execution
+        if not self._has_main:
+            raise CompilationError("Function 'main' is required")
 
         self._is_open = False
 
@@ -49,6 +55,13 @@ class CodeGenerator:
 
     def codegen(self, node: Node, nbVars: int = 0) -> None:
         """One code generation step (entry point of the compilation pipeline)"""
+        if node is None:
+            return
+
+        if node.type == NodeType.NODE_FUNCTION:
+            self.gennode(node)
+            return
+
         if nbVars:
             self.add_line(f"resn {nbVars}") # reserve space for variables
         self.gennode(node)
@@ -118,6 +131,41 @@ class CodeGenerator:
                     self.add_line(f".{loop_info['continue']}")
                 else:
                     loop_info["continue"] = loop_info["head"]
+
+            case NodeType.NODE_FUNCTION:
+                if node.repr is None:
+                    raise CompilationError("Function missing name")
+                if node.repr == "start":
+                    raise CompilationError("Function name 'start' is reserved")
+                self.add_line(f".{node.repr}")
+                locals_count = node.value or 0
+                if locals_count:
+                    self.add_line(f"resn {locals_count}")
+                body = node.children[-1] if node.children else None
+                if body is not None:
+                    self.gennode(body)
+                self.add_line("push 0")
+                self.add_line("ret")
+                if node.repr == "main":
+                    self._has_main = True
+
+            case NodeType.NODE_RETURN:
+                if node.children:
+                    self.gennode(node.children[0])
+                else:
+                    self.add_line("push 0")
+                self.add_line("ret")
+
+            case NodeType.NODE_CALL:
+                if not node.children:
+                    raise CompilationError("Function call missing target")
+                target = node.children[0]
+                if target.type != NodeType.NODE_REF or not target.repr:
+                    raise CompilationError("Function call target must be an identifier")
+                self.add_line(f"prep {target.repr}")
+                for arg in node.children[1:]:
+                    self.gennode(arg)
+                self.add_line(f"call {len(node.children) - 1}")
 
             case _ if node.type in Node.EN:
                 prefix, suffix = Node.EN[node.type]

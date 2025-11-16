@@ -49,6 +49,9 @@ class NodeType(Enum):
     NODE_BREAK = auto()        # break statement
     NODE_CONTINUE = auto()     # continue statement
     NODE_SEQ = auto()          # sequence without scope
+    NODE_FUNCTION = auto()     # function definition
+    NODE_RETURN = auto()       # return statement
+    NODE_CALL = auto()         # function call
 
 class Node:
     def __init__(self, nd_type: NodeType, value: int = None, repr: int = None, index: int = None, children: list[Self] | None = None):
