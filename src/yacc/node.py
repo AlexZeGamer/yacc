@@ -44,6 +44,11 @@ class NodeType(Enum):
     NODE_BLOCK = auto()        # { I* }
     NODE_DROP = auto()         # E;  (evaluate and drop)
     NODE_COND = auto()         # conditional if/else
+    NODE_LOOP = auto()         # generic loop node
+    NODE_TARGET = auto()       # continue target label
+    NODE_BREAK = auto()        # break statement
+    NODE_CONTINUE = auto()     # continue statement
+    NODE_SEQ = auto()          # sequence without scope
 
 class Node:
     def __init__(self, nd_type: NodeType, value: int = None, repr: int = None, index: int = None, children: list[Self] | None = None):
@@ -111,6 +116,7 @@ class Node:
         NodeType.NODE_DEBUG:      (""      , "dbg"   ),
         NodeType.NODE_BLOCK:      (""      , ""      ),  # children will just be added to the code with the loop
         NodeType.NODE_DROP:       (""      , "drop 1"),
+        NodeType.NODE_SEQ:        (""      , ""      ),
     }
 
     def __str__(self) -> str:

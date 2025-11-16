@@ -10,9 +10,11 @@ class SemanticAnalyzer:
         self.symbol_table = symbol_table or SymbolTable()
         self.source_code = source_code
         self.verbose = verbose
+        self._loop_depth: int = 0
 
     def analyze(self, node: Node) -> Node:
         self.symbol_table.nbVars = 0
+        self._loop_depth = 0
 
         self._analyze_node(node)
         if self.verbose:
@@ -29,6 +31,18 @@ class SemanticAnalyzer:
                     self._analyze_node(child)
                 self.symbol_table.end_scope()
 
+            case NodeType.NODE_LOOP:
+                self.symbol_table.start_scope()
+                self._loop_depth += 1
+                for child in node.children:
+                    self._analyze_node(child)
+                self._loop_depth -= 1
+                self.symbol_table.end_scope()
+
+            case NodeType.NODE_SEQ:
+                for child in node.children:
+                    self._analyze_node(child)
+
             case NodeType.NODE_DECLARE:
                 try:
                     self.symbol_table.declare(node.repr)
@@ -44,6 +58,11 @@ class SemanticAnalyzer:
                     raise ValueError(f"{node.children[0].repr} is not a variable")
                 for child in node.children:
                     self._analyze_node(child)
+
+            case NodeType.NODE_BREAK | NodeType.NODE_CONTINUE:
+                if self._loop_depth == 0:
+                    keyword = "break" if node.type == NodeType.NODE_BREAK else "continue"
+                    raise CompilationError(f"'{keyword}' used outside of a loop")
 
             case NodeType.NODE_COND:
                 self._analyze_node(node.children[0]) # condition

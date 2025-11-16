@@ -12,6 +12,7 @@ class CodeGenerator:
         self.source_code = source_code
         self.verbose = verbose
         self._label_counter: int = 0
+        self._loop_stack: list[dict[str, str]] = []
 
     def add_line(self, line: str) -> None:
         """Add one line to the buffer"""
@@ -25,6 +26,7 @@ class CodeGenerator:
 
         self._lines = []
         self._label_counter = 0
+        self._loop_stack = []
         self.add_line(".start")
 
     def _finalize(self) -> None:
@@ -47,9 +49,11 @@ class CodeGenerator:
 
     def codegen(self, node: Node, nbVars: int = 0) -> None:
         """One code generation step (entry point of the compilation pipeline)"""
-        self.add_line(f"resn {nbVars}") # reserve space for variables
+        if nbVars:
+            self.add_line(f"resn {nbVars}") # reserve space for variables
         self.gennode(node)
-        self.add_line(f"drop {nbVars}") # clean up variable space
+        if nbVars:
+            self.add_line(f"drop {nbVars}") # clean up variable space
 
     def gennode(self, node: Node) -> None:
         """Generate code for a single AST node (recursive)"""
@@ -79,6 +83,41 @@ class CodeGenerator:
                     self.add_line(f".{end_label}")
                 else:
                     self.add_line(f".{false_label}")
+
+            case NodeType.NODE_LOOP:
+                loop_id = self._next_label_id()
+                head_label = self._format_label(loop_id, "loop_start")
+                continue_label = self._format_label(loop_id, "loop_continue")
+                end_label = self._format_label(loop_id, "loop_end")
+
+                self._loop_stack.append({
+                    "continue": continue_label,
+                    "end": end_label,
+                    "head": head_label,
+                })
+
+                self.add_line(f".{head_label}")
+                for child in node.children:
+                    self.gennode(child)
+                self.add_line(f"jump {head_label}")
+                self.add_line(f".{end_label}")
+
+                self._loop_stack.pop()
+
+            case NodeType.NODE_BREAK:
+                loop_info = self._current_loop()
+                self.add_line(f"jump {loop_info['end']}")
+
+            case NodeType.NODE_CONTINUE:
+                loop_info = self._current_loop()
+                self.add_line(f"jump {loop_info['continue']}")
+
+            case NodeType.NODE_TARGET:
+                loop_info = self._current_loop()
+                if node.value:
+                    self.add_line(f".{loop_info['continue']}")
+                else:
+                    loop_info["continue"] = loop_info["head"]
 
             case _ if node.type in Node.EN:
                 prefix, suffix = Node.EN[node.type]
@@ -134,3 +173,8 @@ class CodeGenerator:
     @staticmethod
     def _format_label(label_id: int, suffix: str) -> str:
         return f"L{label_id}_{suffix}"
+
+    def _current_loop(self) -> dict[str, str]:
+        if not self._loop_stack:
+            raise CompilationError("Loop control statement used outside of a loop")
+        return self._loop_stack[-1]

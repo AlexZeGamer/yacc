@@ -8,6 +8,8 @@ class TokenType(Enum):
     TOK_IDENT = auto()         # identifiers (variables, etc.) + associated string
 
     # Arithmetic operators
+    TOK_INC = auto()          # ++
+    TOK_DEC = auto()          # --
     TOK_ADD = auto()           # +
     TOK_SUB = auto()           # -
     TOK_MUL = auto()           # *
@@ -81,6 +83,8 @@ class Token:
     }
 
     operators = {
+        "++": TokenType.TOK_INC,
+        "--": TokenType.TOK_DEC,
         "+": TokenType.TOK_ADD,
         "-": TokenType.TOK_SUB,
         "*": TokenType.TOK_MUL,

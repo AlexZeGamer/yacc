@@ -87,8 +87,16 @@ class Parser:
 
     def S(self) -> Node:
         """Parse expressions with unary suffix operators"""
-        # S -> A
-        return self.A() # TODO: implement suffix operators (function calls, array indexing)
+        node = self.A()
+        while True:
+            if self.lexer.check(TokenType.TOK_INC):
+                node = self._make_inc_dec_node(node, delta=1)
+                continue
+            if self.lexer.check(TokenType.TOK_DEC):
+                node = self._make_inc_dec_node(node, delta=-1)
+                continue
+            break
+        return node
 
     def I(self) -> Node:
         """Parse an instruction ("expr;", block or debug)"""
@@ -104,6 +112,80 @@ class Parser:
             while not self.lexer.check(TokenType.TOK_RBRACE):
                 block.add_child(self.I())
             return block
+
+        # while (E) I
+        if self.lexer.check(TokenType.TOK_WHILE):
+            loop = Node(NodeType.NODE_LOOP, children=[Node(NodeType.NODE_TARGET, value=False, children=[])])
+            self.lexer.accept(TokenType.TOK_LPARENTHESIS)
+            cond_expr = self.E()
+            self.lexer.accept(TokenType.TOK_RPARENTHESIS)
+            body = self.I()
+            cond = Node(NodeType.NODE_COND, children=[cond_expr, body, Node(NodeType.NODE_BREAK, children=[])])
+            loop.add_child(cond)
+            return loop
+
+        # do I while (E);
+        if self.lexer.check(TokenType.TOK_DO):
+            body = self.I()
+            target = Node(NodeType.NODE_TARGET, value=True, children=[])
+            self.lexer.accept(TokenType.TOK_WHILE)
+            self.lexer.accept(TokenType.TOK_LPARENTHESIS)
+            cond_expr = self.E()
+            self.lexer.accept(TokenType.TOK_RPARENTHESIS)
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+
+            negated = Node(NodeType.NODE_NOT, children=[cond_expr])
+            cond = Node(NodeType.NODE_COND, children=[negated, Node(NodeType.NODE_BREAK, children=[])])
+
+            return Node(NodeType.NODE_LOOP, children=[body, target, cond])
+
+        # for (E1; E2; E3) I
+        if self.lexer.check(TokenType.TOK_FOR):
+            self.lexer.accept(TokenType.TOK_LPARENTHESIS)
+
+            init_node = None
+            if self.lexer.T.type != TokenType.TOK_SEMICOLON:
+                init_node = self._parse_for_initializer()
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+
+            cond_expr = None
+            if self.lexer.T.type != TokenType.TOK_SEMICOLON:
+                cond_expr = self.E()
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+
+            step_expr = None
+            if self.lexer.T.type != TokenType.TOK_RPARENTHESIS:
+                step_expr = self.E()
+            self.lexer.accept(TokenType.TOK_RPARENTHESIS)
+
+            body = self.I()
+
+            if cond_expr is None:
+                cond_node = Node(NodeType.NODE_CONST, value=1, children=[])
+            else:
+                cond_node = cond_expr
+
+            target = Node(NodeType.NODE_TARGET, value=True, children=[])
+            seq_children = [body, target]
+            if step_expr is not None:
+                seq_children.append(Node(NodeType.NODE_DROP, children=[step_expr]))
+            seq = Node(NodeType.NODE_SEQ, children=seq_children)
+
+            cond = Node(
+                NodeType.NODE_COND,
+                children=[cond_node, seq, Node(NodeType.NODE_BREAK, children=[])],
+            )
+
+            loop = Node(NodeType.NODE_LOOP, children=[cond])
+
+            nodes = []
+            if init_node is not None:
+                nodes.append(init_node)
+            nodes.append(loop)
+
+            if len(nodes) == 1:
+                return nodes[0]
+            return Node(NodeType.NODE_SEQ, children=nodes)
 
         # if (E) I [else I]?
         if self.lexer.check(TokenType.TOK_IF):
@@ -132,7 +214,62 @@ class Parser:
             self.lexer.accept(TokenType.TOK_SEMICOLON)
             return N
 
+        # break ;
+        if self.lexer.check(TokenType.TOK_BREAK):
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+            return Node(NodeType.NODE_BREAK)
+
+        # continue ;
+        if self.lexer.check(TokenType.TOK_CONTINUE):
+            self.lexer.accept(TokenType.TOK_SEMICOLON)
+            return Node(NodeType.NODE_CONTINUE)
+
         # E ;  => drop
         N: Node = self.E()
         self.lexer.accept(TokenType.TOK_SEMICOLON)
         return Node(NodeType.NODE_DROP, children=[N])
+
+    def _make_inc_dec_node(self, node: Node, delta: int) -> Node:
+        """Helper to create increment/decrement nodes"""
+        if node.type != NodeType.NODE_REF:
+            line, col = self.lexer.source_code.pos_to_line_col(self.lexer.pos)
+            op = "++" if delta > 0 else "--"
+            raise SyntaxError(
+                f"Operator {op} requires an identifier at line {line}, column {col}"
+            )
+
+        ident = node.repr
+        ref_lhs = Node(NodeType.NODE_REF, repr=ident)
+        ref_rhs = Node(NodeType.NODE_REF, repr=ident)
+        delta_node = Node(NodeType.NODE_CONST, value=abs(delta), children=[])
+
+        if delta > 0:
+            updated_value = Node(NodeType.NODE_ADD, children=[ref_rhs, delta_node])
+        else:
+            updated_value = Node(NodeType.NODE_SUB, children=[ref_rhs, delta_node])
+
+        return Node(NodeType.NODE_AFFECT, children=[ref_lhs, updated_value])
+
+    def _parse_for_initializer(self) -> Node:
+        """Helper to parse for loop initializer (declaration or expression)"""
+        if self.lexer.T.type == TokenType.TOK_INT:
+            self.lexer.accept(TokenType.TOK_INT)
+            ident = self.lexer.T.repr
+            self.lexer.accept(TokenType.TOK_IDENT)
+            decl = Node(NodeType.NODE_DECLARE, repr=ident)
+            children = [decl]
+
+            if self.lexer.check(TokenType.TOK_AFFECT):
+                expr = self.E()
+                assign = Node(
+                    NodeType.NODE_AFFECT,
+                    children=[Node(NodeType.NODE_REF, repr=ident), expr],
+                )
+                children.append(Node(NodeType.NODE_DROP, children=[assign]))
+
+            if len(children) == 1:
+                return children[0]
+            return Node(NodeType.NODE_SEQ, children=children)
+
+        expr = self.E()
+        return Node(NodeType.NODE_DROP, children=[expr])
