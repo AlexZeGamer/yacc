@@ -132,22 +132,22 @@ yacc input.c -o output.asm --verbose
 
 The compilation process consists of the following steps (and implemented in the following files):
 
-1. **Lexical analysis (tokenisation)**: [`lexer.py`](lexer.py)  
+1. **Lexical analysis (tokenisation)**: [`lexer.py`](src/yacc/lexer.py)  
    Converts the input C source code into a list of tokens representing the smallest units of meaning (keywords, identifiers, operators, etc.)
 
-2. **Syntax analysis (parsing)**: [`parser.py`](parser.py)  
+2. **Syntax analysis (parsing)**: [`parser.py`](src/yacc/parser.py)  
    Parses the sequence of tokens to build an [Abstract Syntax Tree (AST)](https://en.wikipedia.org/wiki/Abstract_syntax_tree) representing the program structure
 
-3. **Semantic analysis**: [`sema.py`](sema.py)  
+3. **Semantic analysis**: [`sema.py`](src/yacc/sema.py)  
    Analyzes the AST to check for semantic errors (e.g., variable declarations, type checking) and annotates the AST with additional information
 
-4. **Optimization**: [`opt.py`](opt.py)  
+4. **Optimization**: [`optimizer.py`](src/yacc/optimizer.py)  
    Performs optimizations on the AST to improve performance (e.g., constant folding, dead code elimination)
 
-5. **Code generation (Codegen)**: [`codegen.py`](codegen.py)  
+5. **Code generation (Codegen)**: [`codegen.py`](src/yacc/codegen.py)  
    Generates the target assembly code from the optimized AST
 
-6. **Optimization**: [`opt.py`](opt.py)  
+6. **Optimization**: [`optimizer.py`](src/yacc/optimizer.py)  
    Performs optimizations on the generated assembly code to improve performance (e.g., removing instructions that cancel each other out, etc.)
 
 7. **Binary**: *(This step is done by the MSM simulator)*  
@@ -166,12 +166,12 @@ graph TB
     end
     left_ASe("**Semantic analysis**<br>sema.py") --> left_Opt
 
-    left_Opt("**Optimization**<br>opt.py") --> left_GC
+    left_Opt("**Optimization**<br>optimizer.py") --> left_GC
 
     subgraph Backend
     left_GC("**Code generation (Codegen)**<br>codegen.py") --> left_Opt2
         end
-    left_Opt2("**Optimization**<br>opt.py") -- msm --> left_Bin
+    left_Opt2("**Optimization**<br>optimizer.py") -- msm --> left_Bin
 
     left_Bin(["**Binary**"])
 ```
