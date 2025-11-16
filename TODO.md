@@ -8,6 +8,7 @@
 - [x] Add a way to get the input from stdin
 - [x] Add verbose/debug modes
   - [x] Think about how to handle verbose mode being enabled the the same time as --stdout (print to stderr?)
+  - [ ] Make sure logger is used at all steps of the pipeline
 - [ ] Add tests for lexer, parser, optimizer, codegen
 - [x] Add a way to print trees beautifully (for debug)
 - [ ] Improve error handling and reporting for compilation errors
@@ -41,8 +42,8 @@
   - [ ] Bibliothèque standard
     - [ ] Malloc / free
     - [ ] Print
-- [ ] Add facultative features
+- [x] Add facultative features
   - [x] one-line declarations with initialization not working (e.g. `int a = 5;`)
-- [ ] Add optimizations
-  - [ ] Constant folding
-  - [ ] Dead code elimination
+- [x] Add optimizations
+  - [x] Constant folding
+  - [x] Dead code elimination
