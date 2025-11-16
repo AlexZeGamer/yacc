@@ -20,6 +20,7 @@
     - [Parameters](#parameters)
     - [Usage with the MSM simulator](#usage-with-the-msm-simulator)
     - [Examples](#examples)
+    - [Testing](#testing)
   - [Compilation Pipeline](#compilation-pipeline)
     - [Compilation Steps](#compilation-steps)
     - [Step by Step Example](#step-by-step-example)
@@ -125,6 +126,16 @@ Compile a C source file with verbose output for debugging:
 ```bash
 yacc input.c -o output.asm --verbose
 ```
+
+## Testing
+
+Install the test runner once (for example with `python -m pip install pytest`) and execute the suite from the repository root:
+
+```bash
+python -m pytest
+```
+
+You can also target a single pipeline step by pointing pytest at the matching file, e.g. `python -m pytest tests/test_parser.py` to limit the run to parser tests.
 
 ## Compilation Pipeline
 

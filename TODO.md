@@ -9,7 +9,7 @@
 - [x] Add verbose/debug modes
   - [x] Think about how to handle verbose mode being enabled the the same time as --stdout (print to stderr?)
   - [ ] Make sure logger is used at all steps of the pipeline
-- [ ] Add tests for lexer, parser, optimizer, codegen
+- [x] Add tests for lexer, parser, optimizer, codegen
 - [x] Add a way to print trees beautifully (for debug)
 - [ ] Improve error handling and reporting for compilation errors
   - [x] Make a custom error class for compilation errors, with line/column info, etc.
@@ -20,7 +20,7 @@
   - [x] Put a schema of the pipeline (Mermaid schema from Notion) + examples
   - [x] Make a README in EN (default) and FR
   - [ ] Add a detailed feature list (what's implemented, what's missing, what's planned)
-  - [ ] Add how to run the tests in the README (once tests are done)
+  - [x] Add how to run the tests in the README (once tests are done)
 - [ ] Make the project available on PyPI
 - [x] Bundle the simulator with the project
 - [ ] Add a way to make an executable from the generated assembly?

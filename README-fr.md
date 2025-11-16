@@ -20,6 +20,7 @@
     - [Paramètres](#paramètres)
     - [Utilisation avec le simulateur MSM](#utilisation-avec-le-simulateur-msm)
     - [Exemples](#exemples)
+    - [Tests](#tests)
   - [Pipeline de compilation](#pipeline-de-compilation)
     - [Étapes de compilation](#étapes-de-compilation)
     - [Exemple pas à pas](#exemple-pas-à-pas)
@@ -125,6 +126,16 @@ Compiler un fichier C avec une sortie verbeuse pour le débogage :
 ```bash
 yacc input.c -o output.asm --verbose
 ```
+
+## Tests
+
+Installer une fois l’outil de test (par exemple `python -m pip install pytest`), puis lancer la suite complète depuis la racine du dépôt :
+
+```bash
+python -m pytest
+```
+
+Il est aussi possible de cibler une étape du pipeline en particulier, par exemple `python -m pytest tests/test_parser.py` pour n’exécuter que les tests du parser.
 
 ## Pipeline de compilation
 
