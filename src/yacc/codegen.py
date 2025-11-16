@@ -72,9 +72,19 @@ class CodeGenerator:
         """Generate code for a single AST node (recursive)"""
         match node.type:
             case NodeType.NODE_AFFECT:
-                self.gennode(node.children[1])
+                target = node.children[0]
+                value = node.children[1]
+                self.gennode(value)
                 self.add_line("dup")
-                self.add_line(f"set {node.children[0].index}")
+                if target.type == NodeType.NODE_REF:
+                    self.add_line(f"set {target.index}")
+                elif target.type == NodeType.NODE_DEREF:
+                    if not target.children:
+                        raise CompilationError("Indirection requires one operand")
+                    self.gennode(target.children[0])
+                    self.add_line("write")
+                else:
+                    raise CompilationError("Invalid assignment target")
 
             case NodeType.NODE_COND:
                 label_id = self._next_label_id()
@@ -166,6 +176,31 @@ class CodeGenerator:
                 for arg in node.children[1:]:
                     self.gennode(arg)
                 self.add_line(f"call {len(node.children) - 1}")
+
+            case NodeType.NODE_DEREF:
+                if not node.children:
+                    raise CompilationError("Indirection requires one operand")
+                self.gennode(node.children[0])
+                self.add_line("read")
+
+            case NodeType.NODE_ADDRESS:
+                if len(node.children) != 1:
+                    raise CompilationError("Address-of operator requires one operand")
+                target = node.children[0]
+                if target.type == NodeType.NODE_REF:
+                    self.add_line("prep start")
+                    self.add_line("swap")
+                    self.add_line("drop 1")
+                    self.add_line("push 1")
+                    self.add_line("sub")
+                    self.add_line(f"push {target.index}")
+                    self.add_line("sub")
+                elif target.type == NodeType.NODE_DEREF:
+                    if not target.children:
+                        raise CompilationError("Indirection requires one operand")
+                    self.gennode(target.children[0])
+                else:
+                    raise CompilationError("Cannot take address of this expression")
 
             case _ if node.type in Node.EN:
                 prefix, suffix = Node.EN[node.type]

@@ -101,10 +101,26 @@ class SemanticAnalyzer:
                 node.index = symbol.index
 
             case NodeType.NODE_AFFECT:
-                if node.children[0].type != NodeType.NODE_REF:
-                    raise ValueError(f"{node.children[0].repr} is not a variable")
+                lhs = node.children[0]
+                rhs = node.children[1]
+                if lhs.type not in (NodeType.NODE_REF, NodeType.NODE_DEREF):
+                    raise CompilationError("Left-hand side of assignment must be a variable or indirection")
+                self._analyze_node(lhs)
+                self._analyze_node(rhs)
+
+            case NodeType.NODE_DEREF:
+                if not node.children:
+                    raise CompilationError("Indirection requires one operand")
                 for child in node.children:
                     self._analyze_node(child)
+
+            case NodeType.NODE_ADDRESS:
+                if len(node.children) != 1:
+                    raise CompilationError("Address-of operator requires one operand")
+                target = node.children[0]
+                if target.type not in (NodeType.NODE_REF, NodeType.NODE_DEREF):
+                    raise CompilationError("Cannot take address of this expression")
+                self._analyze_node(target)
 
             case NodeType.NODE_BREAK | NodeType.NODE_CONTINUE:
                 if self._loop_depth == 0:

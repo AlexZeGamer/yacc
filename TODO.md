@@ -37,9 +37,12 @@
   - [x] Conditionnels
   - [x] Boucles
   - [x] Fonctions
-  - [ ] Pointeurs & Tableaux
+  - [x] Pointeurs & Tableaux
   - [ ] Bibliothèque standard
     - [ ] Malloc / free
     - [ ] Print
 - [ ] Add facultative features
   - [ ] one-line declarations with initialization not working (e.g. `int a = 5;`)
+- [ ] Add optimizations
+  - [ ] Constant folding
+  - [ ] Dead code elimination

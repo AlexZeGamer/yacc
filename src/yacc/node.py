@@ -38,6 +38,8 @@ class NodeType(Enum):
     NODE_DECLARE = auto()         # declaration of a variable
     NODE_REF = auto()          # reference to a variable
     NODE_AFFECT = auto()       # a = b (assignment)
+    NODE_ADDRESS = auto()      # address-of operator
+    NODE_DEREF = auto()        # pointer indirection
 
     # Statements / blocks / debugging
     NODE_DEBUG = auto()        # debug E;

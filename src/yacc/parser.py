@@ -47,6 +47,8 @@ class Parser:
         params: list[Node] = []
         while True:
             self.lexer.accept(TokenType.TOK_INT)
+            while self.lexer.check(TokenType.TOK_MUL):
+                pass
             self.lexer.accept(TokenType.TOK_IDENT)
             ident = self.lexer.T_prev.repr
             params.append(Node(NodeType.NODE_DECLARE, repr=ident))
@@ -94,13 +96,17 @@ class Parser:
 
         # error
         line, col = self.lexer.source_code.pos_to_line_col(self.lexer.pos)
-        raise SyntaxError(
+        raise CompilationError(
             f"Unexpected token {self.lexer.T.repr!r} at line {line}, column {col}: expected constant or '('"
         )
 
     def P(self) -> Node:
         """Parse expressions with unary prefix operators"""
         # P -> !P | -P | +P | S
+        if self.lexer.check(TokenType.TOK_MUL):
+            return Node(NodeType.NODE_DEREF, children=[self.P()])
+        if self.lexer.check(TokenType.TOK_ADDRESS):
+            return Node(NodeType.NODE_ADDRESS, children=[self.P()])
         if self.lexer.check(TokenType.TOK_NOT):
             # [not]->[P]
             return Node(NodeType.NODE_NOT, children=[self.P()])
@@ -120,6 +126,13 @@ class Parser:
             if self.lexer.check(TokenType.TOK_LPARENTHESIS):
                 args = self._parse_call_arguments()
                 node = Node(NodeType.NODE_CALL, children=[node, *args])
+                continue
+            if self.lexer.check(TokenType.TOK_LBRACKET):
+                base = node
+                index_expr = self.E()
+                self.lexer.accept(TokenType.TOK_RBRACKET)
+                plus = Node(NodeType.NODE_ADD, children=[base, index_expr])
+                node = Node(NodeType.NODE_DEREF, children=[plus])
                 continue
             if self.lexer.check(TokenType.TOK_INC):
                 node = self._make_inc_dec_node(node, delta=1)
@@ -254,10 +267,12 @@ class Parser:
 
         # int <id> ; (declaration)
         if self.lexer.check(TokenType.TOK_INT):
-            N: Node = Node(NodeType.NODE_DECLARE, repr=self.lexer.T.repr)
+            while self.lexer.check(TokenType.TOK_MUL):
+                pass
             self.lexer.accept(TokenType.TOK_IDENT)
+            ident = self.lexer.T_prev.repr
             self.lexer.accept(TokenType.TOK_SEMICOLON)
-            return N
+            return Node(NodeType.NODE_DECLARE, repr=ident)
 
         # break ;
         if self.lexer.check(TokenType.TOK_BREAK):
@@ -285,7 +300,7 @@ class Parser:
         if node.type != NodeType.NODE_REF:
             line, col = self.lexer.source_code.pos_to_line_col(self.lexer.pos)
             op = "++" if delta > 0 else "--"
-            raise SyntaxError(
+            raise CompilationError(
                 f"Operator {op} requires an identifier at line {line}, column {col}"
             )
 
@@ -305,8 +320,10 @@ class Parser:
         """Helper to parse for loop initializer (declaration or expression)"""
         if self.lexer.T.type == TokenType.TOK_INT:
             self.lexer.accept(TokenType.TOK_INT)
-            ident = self.lexer.T.repr
+            while self.lexer.check(TokenType.TOK_MUL):
+                pass
             self.lexer.accept(TokenType.TOK_IDENT)
+            ident = self.lexer.T_prev.repr
             decl = Node(NodeType.NODE_DECLARE, repr=ident)
             children = [decl]
 
