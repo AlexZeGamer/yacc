@@ -42,7 +42,7 @@
     - [ ] Malloc / free
     - [ ] Print
 - [ ] Add facultative features
-  - [ ] one-line declarations with initialization not working (e.g. `int a = 5;`)
+  - [x] one-line declarations with initialization not working (e.g. `int a = 5;`)
 - [ ] Add optimizations
   - [ ] Constant folding
   - [ ] Dead code elimination

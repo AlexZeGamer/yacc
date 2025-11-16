@@ -265,14 +265,11 @@ class Parser:
             
             return N
 
-        # int <id> ; (declaration)
-        if self.lexer.check(TokenType.TOK_INT):
-            while self.lexer.check(TokenType.TOK_MUL):
-                pass
-            self.lexer.accept(TokenType.TOK_IDENT)
-            ident = self.lexer.T_prev.repr
+        # int <id> [= E]? ; (declaration)
+        if self.lexer.T and self.lexer.T.type == TokenType.TOK_INT:
+            decl = self._parse_declaration()
             self.lexer.accept(TokenType.TOK_SEMICOLON)
-            return Node(NodeType.NODE_DECLARE, repr=ident)
+            return decl
 
         # break ;
         if self.lexer.check(TokenType.TOK_BREAK):
@@ -316,28 +313,30 @@ class Parser:
 
         return Node(NodeType.NODE_AFFECT, children=[ref_lhs, updated_value])
 
+    def _parse_declaration(self) -> Node:
+        """Parse a variable declaration, with optional initializer."""
+        self.lexer.accept(TokenType.TOK_INT)
+        while self.lexer.check(TokenType.TOK_MUL):
+            pass
+        self.lexer.accept(TokenType.TOK_IDENT)
+        ident = self.lexer.T_prev.repr
+        decl = Node(NodeType.NODE_DECLARE, repr=ident)
+
+        if self.lexer.check(TokenType.TOK_AFFECT):
+            expr = self.E()
+            assign = Node(
+                NodeType.NODE_AFFECT,
+                children=[Node(NodeType.NODE_REF, repr=ident), expr],
+            )
+            drop = Node(NodeType.NODE_DROP, children=[assign])
+            return Node(NodeType.NODE_SEQ, children=[decl, drop])
+
+        return decl
+
     def _parse_for_initializer(self) -> Node:
         """Helper to parse for loop initializer (declaration or expression)"""
         if self.lexer.T.type == TokenType.TOK_INT:
-            self.lexer.accept(TokenType.TOK_INT)
-            while self.lexer.check(TokenType.TOK_MUL):
-                pass
-            self.lexer.accept(TokenType.TOK_IDENT)
-            ident = self.lexer.T_prev.repr
-            decl = Node(NodeType.NODE_DECLARE, repr=ident)
-            children = [decl]
-
-            if self.lexer.check(TokenType.TOK_AFFECT):
-                expr = self.E()
-                assign = Node(
-                    NodeType.NODE_AFFECT,
-                    children=[Node(NodeType.NODE_REF, repr=ident), expr],
-                )
-                children.append(Node(NodeType.NODE_DROP, children=[assign]))
-
-            if len(children) == 1:
-                return children[0]
-            return Node(NodeType.NODE_SEQ, children=children)
+            return self._parse_declaration()
 
         expr = self.E()
         return Node(NodeType.NODE_DROP, children=[expr])
