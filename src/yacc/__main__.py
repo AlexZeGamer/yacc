@@ -35,9 +35,11 @@ def main():
     while lexer.T.type != TokenType.TOK_EOF:
         A = parser.parse()
         A = sema.analyze(A)
-        A = optimizer.optimize(A)
+        A = optimizer.optimize_ast(A)
         codegen.codegen(A, nbVars=sema.symbol_table.nbVars)
-    codegen._finalize()
+    asm = codegen._finalize()
+    asm = optimizer.optimize_asm(asm)
+    codegen._output(asm)
 
 
 def parse_args() -> argparse.Namespace:

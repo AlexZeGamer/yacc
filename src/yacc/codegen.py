@@ -34,17 +34,21 @@ class CodeGenerator:
         self.add_line("call 0")
         self.add_line("halt")
 
-    def _finalize(self) -> None:
-        """End generation by adding suffix lines and write to file or stdout."""
+    def _finalize(self) -> list[str]:
+        """End generation by adding suffix lines."""
         if not self._is_open:
-            return
+            return []
 
         if not self._has_main:
             raise CompilationError("Function 'main' is required")
 
         self._is_open = False
 
-        asm = "\n".join(self._lines) + "\n"
+        return self._lines
+
+    def _output(self, lines: list[str]) -> None:
+        """Output the generated code to file or stdout."""
+        asm = "\n".join(lines) + "\n"
         if self._to_stdout:
             print(asm, end="")
         elif self.output_path is not None:
